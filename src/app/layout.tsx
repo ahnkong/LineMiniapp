@@ -16,20 +16,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [isLiffReady, setIsLiffReady] = useState(false); // Track LIFF readiness
-  const liffId = process.env.NEXT_PUBLIC_TEMPLATE_LINE_LIFF!; //USE YOUR LIFF ID
+  const liffId = process.env.NEXT_PUBLIC_TEMPLATE_LINE_LIFF; //USE YOUR LIFF ID
 
   useEffect(() => {
     // Only initialize LIFF on the client-side
     if (typeof window !== 'undefined') {
       const initializeLiff = async () => {
         try {
-          await liff.init({ liffId: liffId });
-          setIsLiffReady(true); // Set state to indicate LIFF is ready
+          // Only initialize LIFF if LIFF ID is provided
+          if (liffId) {
+            await liff.init({ liffId: liffId });
+          }
         } catch (error) {
+          // If LIFF initialization fails, continue without LIFF
+          console.log('LIFF initialization failed, continuing without LIFF:', error);
+        } finally {
+          // Always set ready to true, even if LIFF fails
+          setIsLiffReady(true);
         }
       };
 
-      initializeLiff();
+      // Add a small delay to ensure window is fully ready
+      const timer = setTimeout(() => {
+        initializeLiff();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    } else {
+      // Server-side: mark as ready immediately
+      setIsLiffReady(true);
     }
   }, [liffId]);
 
@@ -39,7 +54,7 @@ export default function RootLayout({
         {isLiffReady ? (
           <ThirdwebProvider>{children}</ThirdwebProvider>
         ) : (
-          <div>Loading LIFF...</div> // Or a better loading indicator
+          <div>Loading LIFF...</div>
         )}
       </body>
     </html>

@@ -83,58 +83,18 @@ export default function RockPaperScissors() {
   const [showPrize, setShowPrize] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [prizeClaimed, setPrizeClaimed] = useState<boolean>(false);
-  const [gameCount, setGameCount] = useState<number>(0);
-  const [wins, setWins] = useState<number>(0);
-  const [losses, setLosses] = useState<number>(0);
-  const [ties, setTies] = useState<number>(0);
-  const [gameFinished, setGameFinished] = useState<boolean>(false);
-
-  const MAX_GAMES = 10;
 
   const handleChoice = (playerChoice: Choice) => {
-    if (gameFinished) return;
-    
     const computerChoice = getComputerChoice();
     const gameResult = determineWinner(playerChoice, computerChoice);
     setResult({ playerChoice, computerChoice, gameResult });
     setShowPrize(gameResult === "Win" && hasTokenContract);
-
-    // 전적 카운팅
-    if (gameResult === "Win") {
-      setWins(prev => prev + 1);
-    } else if (gameResult === "Lose") {
-      setLosses(prev => prev + 1);
-    } else {
-      setTies(prev => prev + 1);
-    }
-
-    // 게임 횟수 증가
-    const newGameCount = gameCount + 1;
-    setGameCount(newGameCount);
-
-    // 10판이 끝나면 게임 종료
-    if (newGameCount >= MAX_GAMES) {
-      setGameFinished(true);
-    }
   };
 
   const resetGame = () => {
-    if (gameFinished) {
-      // 게임이 끝났을 때는 전체 초기화
-      setResult(null);
-      setShowPrize(false);
-      setPrizeClaimed(false);
-      setGameCount(0);
-      setWins(0);
-      setLosses(0);
-      setTies(0);
-      setGameFinished(false);
-    } else {
-      // 게임 진행 중일 때는 결과만 초기화
-      setResult(null);
-      setShowPrize(false);
-      setPrizeClaimed(false);
-    }
+    setResult(null);
+    setShowPrize(false);
+    setPrizeClaimed(false);
   };
 
   const claimPrize = () => {
@@ -197,7 +157,7 @@ export default function RockPaperScissors() {
                   wallets={[
                     inAppWallet({
                       auth: {
-                        options: ["email"],
+                        options: ["google", "github", "discord", "email"],
                       },
                     }),
                   ]}
@@ -210,26 +170,9 @@ export default function RockPaperScissors() {
                 가위바위보
               </h1>
               
-              {gameFinished ? (
-                <div className="space-y-6 flex-1 flex flex-col justify-center text-center">
-                  <div className="text-6xl mb-4">🎊</div>
-                  <h2 className="text-2xl font-bold text-[#00C300] mb-2">10판 완료!</h2>
-                  <p className="text-gray-400 mb-6">게임이 종료되었습니다</p>
-                  <button
-                    onClick={resetGame}
-                    className="w-full py-4 bg-[#00C300] text-white rounded-2xl font-semibold shadow-lg shadow-[#00C300]/30 hover:bg-[#00B300] transition-all duration-200 hover:scale-[1.02] active:scale-98"
-                  >
-                    새 게임 시작
-                  </button>
-                </div>
-              ) : !result ? (
+              {!result ? (
                 <div className="space-y-10 flex-1 flex flex-col justify-center">
-                  <div className="text-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-300 mb-2">선택하세요</h3>
-                    <p className="text-sm text-gray-500">
-                      {gameCount}/{MAX_GAMES}판 진행 중
-                    </p>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-300 text-center">선택하세요</h3>
                   <div className="flex justify-center gap-6">
                     {choices.map((choice) => (
                       <button
@@ -293,31 +236,20 @@ export default function RockPaperScissors() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-3 pt-4">
-                    {gameFinished ? (
-                      <button
-                        onClick={resetGame}
-                        className="w-full py-4 bg-[#00C300] text-white rounded-2xl font-semibold shadow-lg shadow-[#00C300]/30 hover:bg-[#00B300] transition-all duration-200 hover:scale-[1.02] active:scale-98"
-                      >
-                        새 게임 시작
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={resetGame}
-                          className="w-full py-4 bg-[#00C300] text-white rounded-2xl font-semibold shadow-lg shadow-[#00C300]/30 hover:bg-[#00B300] transition-all duration-200 hover:scale-[1.02] active:scale-98"
-                        >
-                          {gameCount < MAX_GAMES ? "다시 하기" : "결과 보기"}
-                        </button>
+                    <button
+                      onClick={resetGame}
+                      className="w-full py-4 bg-[#00C300] text-white rounded-2xl font-semibold shadow-lg shadow-[#00C300]/30 hover:bg-[#00B300] transition-all duration-200 hover:scale-[1.02] active:scale-98"
+                    >
+                      다시 하기
+                    </button>
 
-                        {showPrize && !prizeClaimed && (
-                          <button
-                            onClick={claimPrize}
-                            className="w-full py-4 bg-yellow-500 text-white rounded-2xl font-semibold shadow-lg shadow-yellow-500/30 hover:bg-yellow-600 transition-all duration-200 hover:scale-[1.02] active:scale-98"
-                          >
-                            🎁 상품 받기
-                          </button>
-                        )}
-                      </>
+                    {showPrize && !prizeClaimed && (
+                      <button
+                        onClick={claimPrize}
+                        className="w-full py-4 bg-yellow-500 text-white rounded-2xl font-semibold shadow-lg shadow-yellow-500/30 hover:bg-yellow-600 transition-all duration-200 hover:scale-[1.02] active:scale-98"
+                      >
+                        🎁 상품 받기
+                      </button>
                     )}
                   </div>
                 </div>
@@ -325,36 +257,6 @@ export default function RockPaperScissors() {
             </div>
           )}
         </div>
-
-        {/* Statistics Container */}
-        {account && gameCount > 0 && (
-          <div className="bg-gray-900 rounded-3xl shadow-2xl p-6 border border-gray-800 mt-6">
-            <h3 className="text-lg font-bold text-[#00C300] mb-4 text-center">전적</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-[#00C300]">{wins}</p>
-                <p className="text-xs text-gray-400 mt-1">승</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-gray-400">{ties}</p>
-                <p className="text-xs text-gray-400 mt-1">무</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-red-500">{losses}</p>
-                <p className="text-xs text-gray-400 mt-1">패</p>
-              </div>
-            </div>
-            {gameCount === MAX_GAMES && (
-              <div className="mt-4 pt-4 border-t border-gray-800">
-                <p className="text-center text-sm text-gray-400">
-                  승률: <span className="text-[#00C300] font-semibold">
-                    {wins > 0 ? Math.round((wins / MAX_GAMES) * 100) : 0}%
-                  </span>
-                </p>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Modal */}
         {showModal && hasTokenContract && contract && (

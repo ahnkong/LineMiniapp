@@ -5,9 +5,9 @@ import { createThirdwebClient } from "thirdweb";
 const clientId = process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID;
 
 if (!clientId) {
-  throw new Error("No client ID provided");
+  console.warn("NEXT_PUBLIC_TEMPLATE_CLIENT_ID is not set. Please set it in your environment variables.");
 }
 
 export const client = createThirdwebClient({
-  clientId: clientId,
+  clientId: clientId || "placeholder-client-id",
 });
